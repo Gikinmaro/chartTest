@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="new">
+  <h2> Behold! Javascript graphs used through Django! </h2>
+</div>
+<div class="list">
+  <h2>  </h2>
+</div>
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+<p>So, I figure I'll put my report right here while I explain how the graph works and what plans I have for it.
+ <br>
+ <br>
+ First, I want to state, 'ow'.  Javascript is not as bad as I thought it would be from the coding perspective, but the debugging is awful.
+ The graph here would simply not show up if I didn't do something right.  I think I spent an hour trying to figure out why a newly added 
+ section of code wouldn't work only to eventually discover I had accidently deleted a comma when I inserted the code.  This makes progress very slow,
+ but its getting faster as I learn all the ways I can control what gets shown.
+ <br>
+ The graph above simply has 2 data sets (randomly created save one entry).  The data is supposed to vaguely resemble the byte histogram.  We've done this, I know, but now its much better and this will serve as a template for future graphs.  Among the features now at your finger tips: 
+ <br> 1. There is a save button in the upper right should you want to keep whatever is currently displayed.
+ <br> 2. Where before the small details of the graph were lost, now you can zoom to any part of the graph you want.  Simply, click and drag over the area to inspect (once you zoom a reset button will appear in the upper right to return to the full view).
+ <br> 3. The graph resizes to fit the data.  Before that spike for '00' would scale the graph so that none of the other points were useful.  Now you can simply select all the data points except the first one (do it from right to left), and now it becomes much easier to see all the smaller hills and valleys
+ <br> 4. Data can be taken on and off the graph on the fly.  Click on one of the data sets in the legend and it will be removed from the graph (the graph will rescale).  The dataset will not be taken from the legend though, so that you can easily put the dataset back on.  This should make it very easy to isolate certain datasets when numerous sets are on display.
+ <br> 5. There is now a hover over for each point.  As you wave the mouse over a point the x point will be displayed (in hex) as well as the value of both the data points at that x value.  The data sets are color coded to match the lines they represent for ease of use.</p>
+ <br> 6. I'm sure there's something else, but I'm tired and six seemed like a good number to stop at.
+ <br> <br> Things to do: I think it could benefit from a little style tweaking, but functionally I think my goal would be to put all the files of a collection on the graph at once... twice.  The idea being that there will be two y axis to match up with.  This way you can select one dataset on one axis and one on another and the graph will scale the y axis so that you can see them relative to one another.  This would mean that the general pattern in small files could easily be compared to the general pattern in large files.  The other thing to do (I hope to do it next weekend) is to come to Rolla and plug this into Oxide proper.  I still want to finish the complete overhaul of the webapp, but I also want to see the pieces work.
+ <br>
+ <br>
+ That's it for me now.  Let me know what you think (both about the new chart and quality of this report).
+<script>
+$(function () {
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container',
+                zoomType: 'x',
+                spacingRight: 20
+            },
+            title: {
+                text: 'Prototype of future graphs'
+            },
+            subtitle: {
+                text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' :
+                    'Drag your finger over the plot to zoom in'
+            },
+            xAxis: {
+                categories: ['{{ xAxis|join:"','" }}'],
+                tickInterval: 10
+            },
+            yAxis: {
+                title: {
+                    text: 'Occurances of byte'
+                },
+                showFirstLabel: false
+            },
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                enabled: true
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, Highcharts.getOptions().colors[20]],
+                            [1, 'rgba(2,0,0,0)']
+                        ]
+                    },
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                radius: 5
+                            }
+                        }
+                    },
+                    shadow: false,
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+            },
+    
+            series: [{
+                type: 'column',
+                name: 'Occurences of byte',
+                data: {{ list1 }}
+            }, {
+                type: 'area',
+                name: 'derp',
+                data: {{ list2 }}
+            }]
+        });
+    });
+    
+});
+</script>
+{% endblock %}
